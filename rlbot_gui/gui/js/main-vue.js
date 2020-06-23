@@ -36,11 +36,11 @@ export default {
 			<span id="story-button-wrapper">
 				<b-button 
 					@click="$router.replace('/story')" variant="dark" class="ml-2"
-					:disabled="!hasAValidFolder()">
+					:disabled="!botpackPreExisting">
 					Story Mode
 				</b-button>
 			</span>
-			<b-tooltip target="story-button-wrapper" v-if="!hasAValidFolder()">
+			<b-tooltip target="story-button-wrapper" v-if="!botpackPreExisting">
 				<b-icon class="warning-icon" icon="exclamation-triangle-fill"></b-icon>
 				Download the BotPack first!
 			</b-tooltip>
@@ -440,6 +440,7 @@ export default {
 				files: {},
 				folders: {}
 			},
+			botpackPreExisting: false,
 			downloadProgressPercent: 0,
 			downloadStatus: '',
 			showBotpackUpdateSnackbar: false,
@@ -651,8 +652,8 @@ export default {
 			eel.scan_for_scripts()(this.scriptsReceived);
 		},
 
-		hasAValidFolder: function() {
-			return Object.keys(this.folderSettings.folders).length > 0
+		botpackPreExistingReceived: function(commit_id) {
+			this.botpackPreExisting = Boolean(commit_id)
 		},
 
 		botpackUpdateChecked: function (isBotpackUpToDate) {
@@ -664,6 +665,7 @@ export default {
 			this.showSnackbar = true;
 			this.$bvModal.hide('bot-pack-download-modal');
 			eel.get_folder_settings()(this.folderSettingsReceived);
+			eel.get_downloaded_botpack_commit_id()(this.botpackPreExistingReceived);
 		},
 
 		onInstallationComplete: function (result) {
@@ -693,6 +695,7 @@ export default {
 			this.applyLanguageWarnings();
 		});
 
+		eel.get_downloaded_botpack_commit_id()(this.botpackPreExistingReceived)
 		eel.is_botpack_up_to_date()(this.botpackUpdateChecked);
 
 		const self = this;
